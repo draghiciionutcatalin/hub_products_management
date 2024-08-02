@@ -4,8 +4,8 @@ import com.draghici.hub.beans.Product;
 import com.draghici.hub.dto.ProductDTO;
 import com.draghici.hub.repositories.ProductRepository;
 import lombok.AllArgsConstructor;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,19 +20,36 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<Product> getAll(Pageable pageable) {
-        logger.info("Request: getAll");
+        logger.info("API Request: get all products");
         return productRepository.findAll(pageable);
     }
 
     @Override
     public Product getOne(Long id) throws Exception {
-        return productRepository.getProductById(id)
-                .orElseThrow(()->new Exception("Product with id: "+ id +" not found"));
+        logger.info("API Request: get one product by id");
+        if (id < 0) {
+            throw new Exception("A product with negative id cannot exist");
+        }
+        return productRepository.getProductById(id).orElseThrow(() -> new Exception("Product with id: " + id + " not found"));
     }
 
     @Override
-    public Product add(ProductDTO productDto) {
-        return null;
+    public Product add(ProductDTO productDto) throws Exception {
+        logger.info("API Request: add new product");
+        if (productDto == null) {
+            throw new Exception("Cannot add a null product");
+        }
+
+        if (productDto.getName() != null && productDto.getPrice() < 0) {
+            var product = new Product();
+            product.setName(productDto.getName());
+            product.setPrice(productDto.getPrice());
+            var newProduct = productRepository.save(product);
+            logger.info("A product was added with id {}", newProduct.getId());
+            return newProduct;
+        } else {
+            throw new Exception("Please provide a name and a price to the product");
+        }
     }
 
     @Override

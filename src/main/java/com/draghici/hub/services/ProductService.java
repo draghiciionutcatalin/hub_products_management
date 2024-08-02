@@ -9,9 +9,9 @@ public interface ProductService {
 
     Page<Product> getAll(Pageable pageable);
 
-    Product getOne(Long id);
+    Product getOne(Long id) throws Exception;
 
-    Product add(ProductDTO productDto);
+    Product add(ProductDTO productDto) throws Exception;
 
     Product update(Long id, ProductDTO productDto);
 
