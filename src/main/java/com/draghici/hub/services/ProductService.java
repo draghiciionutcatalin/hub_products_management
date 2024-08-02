@@ -13,7 +13,7 @@ public interface ProductService {
 
     Product add(ProductDTO productDto) throws Exception;
 
-    Product update(Long id, ProductDTO productDto);
+    Product update(Long id, ProductDTO productDto) throws Exception;
 
-    void delete(Long id);
+    void delete(Long id) throws Exception;
 }

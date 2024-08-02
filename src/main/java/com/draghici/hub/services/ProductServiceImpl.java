@@ -70,17 +70,26 @@ public class ProductServiceImpl implements ProductService {
         Optional.ofNullable(productDto.getPrice()).ifPresent(product::setPrice);
         var updatedProduct = productRepository.save(product);
 
-        logger.info("Product with id: " + id + " updated");
+        logger.info("Product with id {} updated", id);
         return updatedProduct;
 
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id) throws Exception {
+        logger.info("API Request: delete product");
 
+        if (id < 0) {
+            throw new Exception("A product with negative id cannot exist");
+        }
+
+        var product = productRepository.getProductById(id).orElseThrow(() -> productMissingException());
+        productRepository.delete(product);
+
+        logger.info("Product with id {} was deleted", id);
     }
 
     private static Exception productMissingException(Long id) {
-        return new Exception("Product with id: " + id + " not found");
+        return new Exception("Product with id " + id + " not found");
     }
 }
