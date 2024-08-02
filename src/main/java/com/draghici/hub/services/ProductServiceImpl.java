@@ -44,7 +44,7 @@ public class ProductServiceImpl implements ProductService {
             throw new Exception("Cannot add a null product");
         }
 
-        if (productDto.getName() != null && productDto.getPrice() < 0) {
+        if (!"".equals(productDto.getName()) && productDto.getPrice() > 0.0d) {
             var product = new Product();
             product.setName(productDto.getName());
             product.setPrice(productDto.getPrice());
