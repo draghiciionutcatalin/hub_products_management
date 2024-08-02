@@ -25,8 +25,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product getOne(Long id) {
-        return null;
+    public Product getOne(Long id) throws Exception {
+        return productRepository.getProductById(id)
+                .orElseThrow(()->new Exception("Product with id: "+ id +" not found"));
     }
 
     @Override
