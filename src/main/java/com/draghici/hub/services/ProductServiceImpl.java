@@ -83,7 +83,7 @@ public class ProductServiceImpl implements ProductService {
             throw new Exception("A product with negative id cannot exist");
         }
 
-        var product = productRepository.getProductById(id).orElseThrow(() -> productMissingException());
+        var product = productRepository.getProductById(id).orElseThrow(() -> productMissingException(id));
         productRepository.delete(product);
 
         logger.info("Product with id {} was deleted", id);
