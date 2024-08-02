@@ -25,13 +25,13 @@ public class ProductController {
             "id,desc" -> means descending sort by property id \n
             """,
             security = @SecurityRequirement(name = "basicAuth"))
-    @GetMapping
+    @GetMapping("/all")
     Page<Product> listProduct(Pageable pageable) {
         return productService.getAll(pageable);
     }
 
     @Operation(
-            summary = "Get a product. Auth required",
+            summary = "Get a product. Auth required. Only admin role",
             description = "Get product by id",
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/{id}")
@@ -39,7 +39,31 @@ public class ProductController {
         return productService.getOne(id);
     }
 
+    @Operation(
+            summary = "Add product. Auth required. Only admin role",
+            description = "Add a new product",
+            security = @SecurityRequirement(name = "basicAuth"))
+    @PostMapping()
+    Product add(@RequestBody ProductDTO productDto) throws Exception {
+        return productService.add(productDto);
+    }
 
+    @Operation(
+            summary = "Update product. Auth required. Only admin role",
+            description = "Update existing product",
+            security = @SecurityRequirement(name = "basicAuth"))
+    @PatchMapping("/{id}")
+    Product update(@PathVariable("id") Long id, @RequestBody ProductDTO productDto) throws Exception {
+        return productService.update(id, productDto);
+    }
+
+    @Operation(
+            summary = "Delete product. Auth required. Only admin role",
+            description = "Delete existing product",
+            security = @SecurityRequirement(name = "basicAuth"))
+    @DeleteMapping("/{id}")
+    void deleteOne(@PathVariable("id") Long id) throws Exception {
+        productService.delete(id);
+    }
 
 }
-
