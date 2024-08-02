@@ -1,4 +1,4 @@
-package com.draghici.hub.model.beans;
+package com.draghici.hub.beans;
 
 import jakarta.persistence.*;
 import lombok.Data;

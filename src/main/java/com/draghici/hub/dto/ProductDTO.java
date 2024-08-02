@@ -1,4 +1,4 @@
-package com.draghici.hub.model.dto;
+package com.draghici.hub.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
