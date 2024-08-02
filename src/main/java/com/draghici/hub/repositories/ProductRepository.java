@@ -1,6 +1,6 @@
-package com.draghici.hub.repository;
+package com.draghici.hub.repositories;
 
-import com.draghici.hub.model.beans.Product;
+import com.draghici.hub.beans.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
