@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>com.draghici</groupId>
-    <artifactId>hpm</artifactId>
+    <artifactId>hub</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>hub</name>
     <description>Hub Products Management</description>
@@ -75,6 +75,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.23.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.23.1</version>
         </dependency>
     </dependencies>
 
