@@ -10,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 public class ProductServiceImpl implements ProductService {
@@ -27,15 +29,17 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product getOne(Long id) throws Exception {
         logger.info("API Request: get one product by id");
+
         if (id < 0) {
             throw new Exception("A product with negative id cannot exist");
         }
-        return productRepository.getProductById(id).orElseThrow(() -> new Exception("Product with id: " + id + " not found"));
+        return productRepository.getProductById(id).orElseThrow(() -> productMissingException(id));
     }
 
     @Override
     public Product add(ProductDTO productDto) throws Exception {
         logger.info("API Request: add new product");
+
         if (productDto == null) {
             throw new Exception("Cannot add a null product");
         }
@@ -53,12 +57,30 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product update(Long id, ProductDTO productDto) {
-        return null;
+    public Product update(Long id, ProductDTO productDto) throws Exception {
+        logger.info("API Request: update product");
+
+        if (productDto == null) {
+            throw new Exception("Cannot update a null product");
+        }
+
+        var product = productRepository.getProductById(id).orElseThrow(() -> productMissingException(id));
+
+        Optional.ofNullable(productDto.getName()).ifPresent(product::setName);
+        Optional.ofNullable(productDto.getPrice()).ifPresent(product::setPrice);
+        var updatedProduct = productRepository.save(product);
+
+        logger.info("Product with id: " + id + " updated");
+        return updatedProduct;
+
     }
 
     @Override
     public void delete(Long id) {
 
+    }
+
+    private static Exception productMissingException(Long id) {
+        return new Exception("Product with id: " + id + " not found");
     }
 }
