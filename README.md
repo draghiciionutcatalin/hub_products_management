@@ -43,7 +43,7 @@ This is a project for managing products and prices.
    mvn clean test jacoco:report
    ```
 
-7. Open the test coverage report in folder `/target/site/jacoco/index.html`
+7. Open the test coverage report from the project folder at `/target/site/jacoco/index.html`
 
 ## Swagger API Documentation
 
