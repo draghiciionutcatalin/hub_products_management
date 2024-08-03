@@ -1,8 +1,12 @@
 package com.draghici.hub.controllers;
 
 import com.draghici.hub.beans.Product;
+import com.draghici.hub.dto.ProductDTO;
 import com.draghici.hub.repositories.ProductRepository;
 import com.draghici.hub.services.ProductServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.*;
@@ -11,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -21,10 +26,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @SpringBootTest
@@ -111,5 +117,43 @@ public class ProductControllerTest {
         assertNotNull(responseProductAsJson);
         assertTrue(responseProductAsJson.contains(productA.getName()), "Product name should match");
         assertTrue(responseProductAsJson.contains(String.valueOf(productA.getPrice())), "Product price should match");
+    }
+
+    @Test
+    @Order(3)
+    void test_addNewProduct() throws Exception {
+        logger.info("test add() for a new product");
+
+        ProductDTO productDTO = ProductDTO.builder()
+                .name(productB.getName())
+                .price(productB.getPrice())
+                .build();
+
+        when(productRepository.save(any(Product.class))).thenReturn(productB);
+
+        MvcResult result = mockMvc.perform(post("/api/product")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(convertProductToJson(productDTO)))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, "application/json"))
+                .andReturn();
+
+        String expectedResponse = result.getResponse().getContentAsString();
+
+        assertNotNull(expectedResponse);
+        assertTrue(expectedResponse.contains(productB.getName()), "Product name should match");
+        assertTrue(expectedResponse.contains(String.valueOf(productB.getPrice())), "Product price should match");
+    }
+
+    private String convertProductToJson(ProductDTO productDTO) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+            ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+            return ow.writeValueAsString(productDTO);
+        } catch (Exception e) {
+            logger.error("convertProductToJson(): {}", e.getMessage());
+        }
+        return "";
     }
 }
