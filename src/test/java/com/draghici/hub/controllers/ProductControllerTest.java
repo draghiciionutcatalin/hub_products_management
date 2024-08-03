@@ -28,8 +28,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
@@ -143,6 +142,30 @@ public class ProductControllerTest {
         assertNotNull(expectedResponse);
         assertTrue(expectedResponse.contains(productB.getName()), "Product name should match");
         assertTrue(expectedResponse.contains(String.valueOf(productB.getPrice())), "Product price should match");
+    }
+
+    @Test
+    @Order(4)
+    void test_updateProduct() throws Exception {
+        logger.info("test update() in ProductController");
+
+        ProductDTO productDTO = ProductDTO.builder()
+                .name(productB.getName())
+                .price(237.8)
+                .build();
+
+        when(productRepository.getProductById(productB.getId())).thenReturn(Optional.ofNullable(productA));
+
+        MvcResult result = mockMvc.perform(patch("/api/product/" + productB.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(convertProductToJson(productDTO)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String expectedResponse = result.getResponse().getContentAsString();
+
+        assertNotNull(expectedResponse);
+        assertEquals("", expectedResponse, "Response should be empty");
     }
 
     private String convertProductToJson(ProductDTO productDTO) {
