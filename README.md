@@ -38,10 +38,12 @@ This is a project for managing products and prices.
    ```
 5. Test the available APIs with your preferred method or the included Swagger UI
 
-6. Test coverage. Report available in folder '/target/site/jacoco/index.html'
+6. Run test coverage
    ```sh
    mvn clean test jacoco:report
    ```
+
+7. Open the test coverage report in folder `/target/site/jacoco/index.html`
 
 ## Swagger API Documentation
 
