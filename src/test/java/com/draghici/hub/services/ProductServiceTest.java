@@ -161,4 +161,87 @@ public class ProductServiceTest {
 
         assertEquals("Please provide a name and a positive price for the product", exception.getMessage(), "Exception message should match");
     }
+
+    @Test
+    @Order(8)
+    void test_addFaultyProduct2() {
+        logger.info("test add() for a faulty product 2");
+
+        ProductDTO productDTO = ProductDTO.builder().name("AAA").price(-1.1).build();
+
+        ProductException exception = assertThrows(ProductException.class, () -> productService.add(productDTO));
+
+        assertEquals("Please provide a name and a positive price for the product", exception.getMessage(), "Exception message should match");
+    }
+
+    @Test
+    @Order(9)
+    void test_updateProduct() {
+        logger.info("test update() for a product");
+
+        ProductDTO productDTO = ProductDTO.builder().name(productA.getName()).price(87.2).build();
+
+        Product product = productA;
+        product.setPrice(87.2);
+        Long targetID = productA.getId();
+
+        when(productRepository.getProductById(targetID)).thenReturn(Optional.of(product));
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+
+        Product expectedResult = productService.update(targetID, productDTO);
+
+        assertNotNull(expectedResult);
+        assertEquals(product.getId(), expectedResult.getId(), "Product ID should match");
+        assertEquals(product.getName(), expectedResult.getName(), "Product name should match");
+        assertEquals(product.getPrice(), expectedResult.getPrice(), "Product price should match");
+    }
+
+    @Test
+    @Order(10)
+    void test_updateNullProduct() {
+        logger.info("test update() for a null product");
+
+        ProductException exception = assertThrows(ProductException.class, () -> productService.update(productA.getId(), null));
+
+        assertEquals("Cannot update a null product", exception.getMessage(), "Exception message should match");
+    }
+
+    @Test
+    @Order(11)
+    void test_updateMissingProduct() {
+        logger.info("test update() for a missing product");
+
+        ProductDTO productDTO = ProductDTO.builder().name(productA.getName()).price(productA.getPrice()).build();
+        Long targetID = 455689L;
+
+        when(productRepository.getProductById(targetID)).thenReturn(Optional.empty());
+
+        ProductException exception = assertThrows(ProductException.class, () -> productService.update(targetID, productDTO));
+
+        assertEquals("Product with id " + targetID + " not found", exception.getMessage(), "Exception message should match");
+    }
+
+    @Test
+    @Order(12)
+    void test_updateFaultyProduct() {
+        logger.info("test update() for a faulty product");
+
+        ProductDTO productDTO = ProductDTO.builder().name("").price(187.2).build();
+
+        ProductException exception = assertThrows(ProductException.class, () -> productService.update(1L, productDTO));
+
+        assertEquals("Please provide a name and a positive price for the product", exception.getMessage(), "Exception message should match");
+    }
+
+    @Test
+    @Order(13)
+    void test_updateFaultyProduct2() {
+        logger.info("test update() for a faulty product 2");
+
+        ProductDTO productDTO = ProductDTO.builder().name("BBB").price(-41.1).build();
+
+        ProductException exception = assertThrows(ProductException.class, () -> productService.update(2L, productDTO));
+
+        assertEquals("Please provide a name and a positive price for the product", exception.getMessage(), "Exception message should match");
+    }
 }
