@@ -2,12 +2,12 @@ package com.draghici.hub.services;
 
 
 import com.draghici.hub.beans.Product;
+import com.draghici.hub.dto.ProductDTO;
+import com.draghici.hub.exceptions.ProductException;
 import com.draghici.hub.repositories.ProductRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,11 +17,14 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ProductServiceTest {
 
     private final static Logger logger = LogManager.getLogger(ProductServiceTest.class);
@@ -39,8 +42,6 @@ public class ProductServiceTest {
 
     @BeforeEach
     public void setup() {
-        logger.info("@BeforeEach: initial setup");
-
         productList = new ArrayList<>();
 
         productA = new Product();
@@ -60,10 +61,10 @@ public class ProductServiceTest {
 
     @Test
     @Order(1)
-    void test_getAll(){
+    void test_getAll() {
         logger.info("test getAll()");
 
-        var pageable = PageRequest.of(0,10);
+        var pageable = PageRequest.of(0, 10);
         when(productRepository.findAll(pageable)).thenReturn(new PageImpl<>(productList));
 
         Page<Product> result = productService.getAll(pageable);
@@ -73,5 +74,91 @@ public class ProductServiceTest {
         assertEquals("Product A test", result.getContent().get(0).getName(), "Product name should match");
         assertEquals(7.09, result.getContent().get(1).getPrice(), "Product price should match");
 
+    }
+
+    @Test
+    @Order(2)
+    void test_getById() {
+        logger.info("test getById() for existing product");
+
+        Long targetID = 1L;
+        when(productRepository.getProductById(targetID)).thenReturn(Optional.ofNullable(productA));
+
+        var result = productService.getById(targetID);
+
+        assertNotNull(result);
+        assertEquals(targetID, result.getId(), "Product ID should match");
+        assertEquals("Product A test", result.getName(), "Product name should match");
+    }
+
+    @Test
+    @Order(3)
+    void test_getByWrongId() {
+        logger.info("test getById() for missing product");
+
+        Long targetID = 153234123L;
+        when(productRepository.getProductById(targetID)).thenReturn(Optional.empty());
+
+        ProductException exception = assertThrows(ProductException.class, () -> {
+            productService.getById(targetID);
+        });
+
+        assertEquals("Product with id " + targetID + " not found", exception.getMessage(), "Exception message should match");
+    }
+
+    @Test
+    @Order(4)
+    void test_getByNegativeId() {
+        logger.info("test getById() for negative product id");
+
+        Long targetID = -1L;
+
+        ProductException exception = assertThrows(ProductException.class, () -> productService.getById(targetID));
+
+        assertEquals("A product with negative id cannot exist", exception.getMessage(), "Exception message should match");
+    }
+
+    @Test
+    @Order(5)
+    void test_addNewProduct() {
+        logger.info("test add() for a new product");
+
+        ProductDTO productDTO = ProductDTO.builder().name("Product C test").price(87.2).build();
+
+        Product product = new Product();
+        product.setId(4L);
+        product.setName("Product C test");
+        product.setPrice(87.2);
+
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+
+        Product expectedResult = productService.add(productDTO);
+
+        assertNotNull(expectedResult);
+        assertEquals(product.getId(), expectedResult.getId(), "Product ID should match");
+        assertEquals(product.getName(), expectedResult.getName(), "Product name should match");
+        assertEquals(product.getPrice(), expectedResult.getPrice(), "Product price should match");
+    }
+
+    @Test
+    @Order(6)
+    void test_addNullProduct() {
+        logger.info("test add() for a null product");
+
+        ProductException exception = assertThrows(ProductException.class, () -> productService.add(null));
+
+        assertEquals("Cannot add a null product", exception.getMessage(), "Exception message should match");
+    }
+
+    @Test
+    @Order(7)
+    void test_addFaultyProduct() {
+        logger.info("test add() for a faulty product");
+
+        ProductDTO productDTO = ProductDTO.builder().name("").price(187.2).build();
+
+        ProductException exception = assertThrows(ProductException.class, () -> productService.add(productDTO));
+
+        assertEquals("Please provide a name and a positive price for the product", exception.getMessage(), "Exception message should match");
     }
 }
