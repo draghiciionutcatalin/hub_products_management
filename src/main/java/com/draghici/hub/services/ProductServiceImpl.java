@@ -67,6 +67,10 @@ public class ProductServiceImpl implements ProductService {
             throw new ProductException("Cannot update a null product", HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        if ("".equals(productDto.getName()) || productDto.getPrice() < 0.0d) {
+            throw new ProductException("Please provide a name and a positive price for the product", HTTP_UNPROCESSABLE_ENTITY);
+        }
+
         var product = productRepository.getProductById(id).orElseThrow(() -> productMissingException(id));
 
         Optional.ofNullable(productDto.getName()).ifPresent(product::setName);
