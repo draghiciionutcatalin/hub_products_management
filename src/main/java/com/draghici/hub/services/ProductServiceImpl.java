@@ -30,17 +30,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product getOne(Long id) throws Exception {
+    public Product getById(Long id) {
         logger.info("API Request: get one product by id");
 
         if (id < 0) {
-            productNegativeIdException();
+            throw productNegativeIdException();
         }
         return productRepository.getProductById(id).orElseThrow(() -> productMissingException(id));
     }
 
     @Override
-    public Product add(ProductDTO productDto) throws Exception {
+    public Product add(ProductDTO productDto) {
         logger.info("API Request: add new product");
 
         if (productDto == null) {
@@ -60,7 +60,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product update(Long id, ProductDTO productDto) throws Exception {
+    public Product update(Long id, ProductDTO productDto) {
         logger.info("API Request: update product");
 
         if (productDto == null) {
@@ -79,11 +79,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void delete(Long id) throws Exception {
+    public void delete(Long id) {
         logger.info("API Request: delete product");
 
         if (id < 0) {
-            productNegativeIdException();
+            throw productNegativeIdException();
         }
 
         var product = productRepository.getProductById(id).orElseThrow(() -> productMissingException(id));
@@ -92,11 +92,11 @@ public class ProductServiceImpl implements ProductService {
         logger.info("Product with id {} was deleted", id);
     }
 
-    private static Exception productMissingException(Long id) {
+    private static ProductException productMissingException(Long id) {
         return new ProductException("Product with id " + id + " not found", HTTP_NOT_FOUND);
     }
 
-    private static Exception productNegativeIdException() {
+    private static ProductException productNegativeIdException() {
         return new ProductException("A product with negative id cannot exist", HTTP_UNPROCESSABLE_ENTITY);
     }
 }

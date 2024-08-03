@@ -9,11 +9,11 @@ public interface ProductService {
 
     Page<Product> getAll(Pageable pageable);
 
-    Product getOne(Long id) throws Exception;
+    Product getById(Long id);
 
-    Product add(ProductDTO productDto) throws Exception;
+    Product add(ProductDTO productDto);
 
-    Product update(Long id, ProductDTO productDto) throws Exception;
+    Product update(Long id, ProductDTO productDto);
 
-    void delete(Long id) throws Exception;
+    void delete(Long id);
 }

@@ -35,8 +35,8 @@ public class ProductController {
             description = "Get product by id",
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/{id}")
-    Product getOne(@PathVariable("id") Long id) throws Exception {
-        return productService.getOne(id);
+    Product getOne(@PathVariable("id") Long id) {
+        return productService.getById(id);
     }
 
     @Operation(
@@ -44,7 +44,7 @@ public class ProductController {
             description = "Add a new product",
             security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping()
-    Product add(@RequestBody ProductDTO productDto) throws Exception {
+    Product add(@RequestBody ProductDTO productDto) {
         return productService.add(productDto);
     }
 
@@ -53,7 +53,7 @@ public class ProductController {
             description = "Update existing product",
             security = @SecurityRequirement(name = "basicAuth"))
     @PatchMapping("/{id}")
-    Product update(@PathVariable("id") Long id, @RequestBody ProductDTO productDto) throws Exception {
+    Product update(@PathVariable("id") Long id, @RequestBody ProductDTO productDto) {
         return productService.update(id, productDto);
     }
 
@@ -62,7 +62,7 @@ public class ProductController {
             description = "Delete existing product",
             security = @SecurityRequirement(name = "basicAuth"))
     @DeleteMapping("/{id}")
-    void deleteOne(@PathVariable("id") Long id) throws Exception {
+    void deleteOne(@PathVariable("id") Long id) {
         productService.delete(id);
     }
 
