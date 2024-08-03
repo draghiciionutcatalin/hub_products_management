@@ -38,6 +38,11 @@ This is a project for managing products and prices.
    ```
 5. Test the available APIs with your preferred method or the included Swagger UI
 
+6. Test coverage. Report available in folder '/target/site/jacoco/index.html'
+   ```sh
+   mvn clean test jacoco:report
+   ```
+
 ## Swagger API Documentation
 
 After the application has started, please access the Swagger UI to view and interact with the API documentation:
