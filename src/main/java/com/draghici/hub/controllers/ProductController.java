@@ -62,7 +62,7 @@ public class ProductController {
             description = "Delete existing product",
             security = @SecurityRequirement(name = "basicAuth"))
     @DeleteMapping("/{id}")
-    void deleteOne(@PathVariable("id") Long id) {
+    void deleteById(@PathVariable("id") Long id) {
         productService.delete(id);
     }
 
