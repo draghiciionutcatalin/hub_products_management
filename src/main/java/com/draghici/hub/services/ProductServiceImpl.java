@@ -47,7 +47,7 @@ public class ProductServiceImpl implements ProductService {
             throw new ProductException("Cannot add a null product", HTTP_UNPROCESSABLE_ENTITY);
         }
         if ("".equals(productDto.getName()) || productDto.getPrice() < 0.0d) {
-            throw new ProductException("Please provide a name and a price for the product", HTTP_UNPROCESSABLE_ENTITY);
+            throw new ProductException("Please provide a name and a positive price for the product", HTTP_UNPROCESSABLE_ENTITY);
         }
 
         var product = new Product();
