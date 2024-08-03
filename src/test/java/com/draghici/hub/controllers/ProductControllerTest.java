@@ -18,9 +18,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -94,5 +94,22 @@ public class ProductControllerTest {
         assertEquals(7.09, expectedResult.getContent().get(1).getPrice(), "Product price should match");
     }
 
+    @Test
+    @Order(2)
+    void test_getOneProduct() throws Exception {
+        logger.info("test getOne() in ProductController");
 
+        when(productRepository.getProductById(1L)).thenReturn(Optional.ofNullable(productA));
+
+        MvcResult result = mockMvc.perform(get("/api/product/1")
+                        .content(String.valueOf(productA)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseProductAsJson = result.getResponse().getContentAsString();
+
+        assertNotNull(responseProductAsJson);
+        assertTrue(responseProductAsJson.contains(productA.getName()), "Product name should match");
+        assertTrue(responseProductAsJson.contains(String.valueOf(productA.getPrice())), "Product price should match");
+    }
 }
