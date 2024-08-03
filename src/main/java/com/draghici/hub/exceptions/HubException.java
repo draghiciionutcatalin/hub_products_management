@@ -8,5 +8,5 @@ import lombok.Data;
 public class HubException {
 
     String errorMessage;
-    int statusCode;
+    int errorCode;
 }
