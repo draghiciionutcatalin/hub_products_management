@@ -15,9 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,23 +36,19 @@ public class ProductServiceTest {
     // mock 2 DB products
     Product productA;
     Product productB;
-    List<Product> productList;
 
     @BeforeEach
     public void setup() {
-        productList = new ArrayList<>();
 
         productA = new Product();
         productA.setId(1L);
         productA.setName("Product A test");
         productA.setPrice(19.2);
-        productList.add(productA);
 
         productB = new Product();
         productB.setId(2L);
         productB.setName("Product B test");
         productB.setPrice(7.09);
-        productList.add(productB);
 
         productRepository.saveAll(List.of(productA, productB));
     }
@@ -63,6 +57,10 @@ public class ProductServiceTest {
     @Order(1)
     void test_getAll() {
         logger.info("test getAll()");
+
+        List<Product> productList = new ArrayList<>();
+        productList.add(productA);
+        productList.add(productB);
 
         var pageable = PageRequest.of(0, 10);
         when(productRepository.findAll(pageable)).thenReturn(new PageImpl<>(productList));
@@ -99,9 +97,7 @@ public class ProductServiceTest {
         Long targetID = 153234123L;
         when(productRepository.getProductById(targetID)).thenReturn(Optional.empty());
 
-        ProductException exception = assertThrows(ProductException.class, () -> {
-            productService.getById(targetID);
-        });
+        ProductException exception = assertThrows(ProductException.class, () -> productService.getById(targetID));
 
         assertEquals("Product with id " + targetID + " not found", exception.getMessage(), "Exception message should match");
     }
