@@ -10,9 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -21,6 +19,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -78,43 +77,21 @@ public class ProductControllerTest {
     void test_getListProduct() throws Exception {
         logger.info("test listProduct() in ProductController");
 
-
-        var pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(0, 10);
         List<Product> list = new ArrayList<>();
         list.add(productA);
         list.add(productB);
-        Page<Product> listPage = new PageImpl<>(list, pageable, list.size());
-        //when(productRepository.findAll(pageable)).thenReturn(listPage);
-        when(productService.getAll(PageRequest.of(0, 10))).thenReturn(listPage);
+        Page<Product> productPage = new PageImpl<>(list, pageable, list.size());
 
-        //v2
-        Page<Product> productPage = new PageImpl<>(list, PageRequest.of(0, 10), list.size());
+        when(productService.getAll(pageable)).thenReturn(productPage);
 
-        when(productService.getAll(PageRequest.of(0, 10))).thenReturn(productPage);
+        Page<Product> expectedResult = productController.listProduct(pageable);
 
-        mockMvc.perform(get("/api/product/all")
-                        .param("page", "0")
-                        .param("size", "10")
-                        .param("sort", "[\"id\"]")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().json("{\"content\":[{\"id\":1,\"name\":\"Product 1\",\"price\":10.0},{\"id\":2,\"name\":\"Product 2\",\"price\":20.0}],\"pageable\":\"INSTANCE\",\"last\":true,\"totalPages\":1,\"totalElements\":2,\"size\":10,\"number\":0,\"sort\":{\"unsorted\":true,\"sorted\":false,\"empty\":true},\"first\":true,\"numberOfElements\":2,\"empty\":false}"));
-
-        MvcResult result = mockMvc.perform(get("/api/product/all")
-                        .param("page", "0")
-                        .param("size", "10")
-                        .param("sort", "[\"id\"]")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String responseProductAsJson = result.getResponse().getContentAsString();
-
-        assertNotNull(responseProductAsJson);
-       /* assertEquals(2, expectedResult.getTotalElements(), "Total elements should be 2");
+        assertNotNull(expectedResult);
+        assertEquals(2, expectedResult.getTotalElements(), "Total elements should be 2");
         assertEquals(1L, expectedResult.getContent().get(0).getId(), "Product ID should match");
         assertEquals("Product A test", expectedResult.getContent().get(0).getName(), "Product name should match");
-        assertEquals(7.09, expectedResult.getContent().get(1).getPrice(), "Product price should match");*/
+        assertEquals(7.09, expectedResult.getContent().get(1).getPrice(), "Product price should match");
     }
 
 
