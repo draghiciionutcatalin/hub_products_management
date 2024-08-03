@@ -18,7 +18,8 @@ import org.springframework.data.domain.PageRequest;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -239,5 +240,49 @@ public class ProductServiceTest {
         ProductException exception = assertThrows(ProductException.class, () -> productService.update(2L, productDTO));
 
         assertEquals("Please provide a name and a positive price for the product", exception.getMessage(), "Exception message should match");
+    }
+
+    @Test
+    @Order(14)
+    void test_deleteProduct() {
+        logger.info("test delete() for a product");
+
+        Long targetID = 1L;
+        when(productRepository.getProductById(targetID)).thenReturn(Optional.ofNullable(productA));
+
+        //act
+        productService.delete(targetID);
+
+        //verify the deletion
+        verify(productRepository).delete(productA);
+
+        //mock the updated product list
+        when(productRepository.findAll()).thenReturn(Collections.singletonList(productB));
+        assertEquals(1, productRepository.findAll().size(), "Size should match");
+    }
+
+    @Test
+    @Order(15)
+    void test_deleteNegativeProduct() {
+        logger.info("test delete() for a negative product");
+
+        Long targetID = -213243L;
+
+        ProductException exception = assertThrows(ProductException.class, () -> productService.delete(targetID));
+
+        assertEquals("A product with negative id cannot exist", exception.getMessage(), "Exception message should match");
+    }
+
+    @Test
+    @Order(16)
+    void test_deleteMissingProduct() {
+        logger.info("test delete() for a missing product");
+
+        Long targetID = 1231231L;
+        when(productRepository.getProductById(targetID)).thenReturn(Optional.empty());
+
+        ProductException exception = assertThrows(ProductException.class, () -> productService.delete(targetID));
+
+        assertEquals("Product with id " + targetID + " not found", exception.getMessage(), "Exception message should match");
     }
 }
