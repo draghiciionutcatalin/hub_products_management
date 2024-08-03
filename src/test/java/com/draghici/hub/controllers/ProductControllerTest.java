@@ -27,6 +27,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -79,7 +80,7 @@ public class ProductControllerTest {
 
     @Test
     @Order(1)
-    void test_getListProduct() throws Exception {
+    void test_getListProduct() {
         logger.info("test listProduct() in ProductController");
 
         Pageable pageable = PageRequest.of(0, 10);
@@ -166,6 +167,23 @@ public class ProductControllerTest {
 
         assertNotNull(expectedResponse);
         assertEquals("", expectedResponse, "Response should be empty");
+    }
+
+    @Test
+    @Order(5)
+    void test_deleteProduct() throws Exception {
+        logger.info("test update() in ProductController");
+
+        Long targetID = productA.getId();
+        when(productRepository.getProductById(targetID)).thenReturn(Optional.ofNullable(productA));
+
+        mockMvc.perform(delete("/api/product/" + targetID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        //verify the deletion
+        verify(productRepository).delete(productA);
     }
 
     private String convertProductToJson(ProductDTO productDTO) {
