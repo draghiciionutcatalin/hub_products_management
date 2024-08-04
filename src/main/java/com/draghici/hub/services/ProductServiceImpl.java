@@ -7,10 +7,9 @@ import com.draghici.hub.repositories.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,9 +23,9 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
     @Override
-    public Page<Product> getAll(Pageable pageable) {
+    public List<Product> getAll() {
         logger.info("API Request: get all products");
-        return productRepository.findAll(pageable);
+        return productRepository.findAll();
     }
 
     @Override

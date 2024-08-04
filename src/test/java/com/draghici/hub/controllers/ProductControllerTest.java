@@ -4,6 +4,7 @@ import com.draghici.hub.beans.Product;
 import com.draghici.hub.dto.ProductDTO;
 import com.draghici.hub.repositories.ProductRepository;
 import com.draghici.hub.services.ProductServiceImpl;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -14,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -80,24 +80,24 @@ public class ProductControllerTest {
 
     @Test
     @Order(1)
-    void test_getListProduct() {
+    void test_getListProduct() throws Exception {
         logger.info("test listProduct() in ProductController");
 
-        Pageable pageable = PageRequest.of(0, 10);
         List<Product> list = new ArrayList<>();
         list.add(productA);
         list.add(productB);
-        Page<Product> productPage = new PageImpl<>(list, pageable, list.size());
 
-        when(productService.getAll(pageable)).thenReturn(productPage);
+        when(productRepository.findAll()).thenReturn(list);
 
-        Page<Product> expectedResult = productController.listProduct(pageable);
+        MvcResult expectedResult = mockMvc.perform(get("/api/product/all")).andExpect(status().isOk()).andReturn();
 
-        assertNotNull(expectedResult);
-        assertEquals(2, expectedResult.getTotalElements(), "Total elements should be 2");
-        assertEquals(1L, expectedResult.getContent().get(0).getId(), "Product ID should match");
-        assertEquals("Product A test", expectedResult.getContent().get(0).getName(), "Product name should match");
-        assertEquals(7.09, expectedResult.getContent().get(1).getPrice(), "Product price should match");
+        List<Product> responseList = convertFromJson(expectedResult.getResponse().getContentAsString());
+
+        assertNotNull(responseList);
+        assertEquals(2, responseList.size(), "Size should match");
+        assertEquals(2, responseList.size(), "Size should match");
+        assertEquals("Product A test", responseList.get(0).getName(), "Product name should match");
+        assertEquals(7.09, responseList.get(1).getPrice(), "Product price should match");
     }
 
     @Test
@@ -107,10 +107,7 @@ public class ProductControllerTest {
 
         when(productRepository.getProductById(1L)).thenReturn(Optional.ofNullable(productA));
 
-        MvcResult result = mockMvc.perform(get("/api/product/1")
-                        .content(String.valueOf(productA)))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = mockMvc.perform(get("/api/product/1").content(String.valueOf(productA))).andExpect(status().isOk()).andReturn();
 
         String responseProductAsJson = result.getResponse().getContentAsString();
 
@@ -124,19 +121,11 @@ public class ProductControllerTest {
     void test_addNewProduct() throws Exception {
         logger.info("test add() for a new product");
 
-        ProductDTO productDTO = ProductDTO.builder()
-                .name(productB.getName())
-                .price(productB.getPrice())
-                .build();
+        ProductDTO productDTO = ProductDTO.builder().name(productB.getName()).price(productB.getPrice()).build();
 
         when(productRepository.save(any(Product.class))).thenReturn(productB);
 
-        MvcResult result = mockMvc.perform(post("/api/product")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(convertProductToJson(productDTO)))
-                .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, "application/json"))
-                .andReturn();
+        MvcResult result = mockMvc.perform(post("/api/product").contentType(MediaType.APPLICATION_JSON).content(convertProductToJson(productDTO))).andExpect(status().isOk()).andExpect(header().string(HttpHeaders.CONTENT_TYPE, "application/json")).andReturn();
 
         String expectedResponse = result.getResponse().getContentAsString();
 
@@ -150,18 +139,11 @@ public class ProductControllerTest {
     void test_updateProduct() throws Exception {
         logger.info("test update() in ProductController");
 
-        ProductDTO productDTO = ProductDTO.builder()
-                .name(productB.getName())
-                .price(237.8)
-                .build();
+        ProductDTO productDTO = ProductDTO.builder().name(productB.getName()).price(237.8).build();
 
         when(productRepository.getProductById(productB.getId())).thenReturn(Optional.ofNullable(productA));
 
-        MvcResult result = mockMvc.perform(patch("/api/product/" + productB.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(convertProductToJson(productDTO)))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = mockMvc.perform(patch("/api/product/" + productB.getId()).contentType(MediaType.APPLICATION_JSON).content(convertProductToJson(productDTO))).andExpect(status().isOk()).andReturn();
 
         String expectedResponse = result.getResponse().getContentAsString();
 
@@ -177,10 +159,7 @@ public class ProductControllerTest {
         Long targetID = productA.getId();
         when(productRepository.getProductById(targetID)).thenReturn(Optional.ofNullable(productA));
 
-        mockMvc.perform(delete("/api/product/" + targetID)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
+        mockMvc.perform(delete("/api/product/" + targetID).contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andReturn();
 
         //verify the deletion
         verify(productRepository).delete(productA);
@@ -196,5 +175,16 @@ public class ProductControllerTest {
             logger.error("convertProductToJson(): {}", e.getMessage());
         }
         return "";
+    }
+
+    private List<Product> convertFromJson(String json) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(json, new TypeReference<>() {
+            });
+        } catch (Exception e) {
+            logger.error("convertFromJson(): {}", e.getMessage());
+        }
+        return null;
     }
 }

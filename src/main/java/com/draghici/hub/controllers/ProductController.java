@@ -6,9 +6,9 @@ import com.draghici.hub.services.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/product")
@@ -19,15 +19,11 @@ public class ProductController {
 
     @Operation(
             summary = "Get the list of products. Auth required",
-            description = """
-            Returns the list of products in paginated format. The endpoint supports pagination parameters like page number, page size and sort by field. \n
-            ex: {"page": 0, "size": 10, "sort": ["id,desc"]} \n
-            "id,desc" -> means descending sort by property id \n
-            """,
+            description = "Returns the list of products",
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/all")
-    Page<Product> listProduct(Pageable pageable) {
-        return productService.getAll(pageable);
+    List<Product> listProduct() {
+        return productService.getAll();
     }
 
     @Operation(

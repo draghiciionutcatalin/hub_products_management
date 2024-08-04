@@ -1,6 +1,5 @@
 package com.draghici.hub.services;
 
-
 import com.draghici.hub.beans.Product;
 import com.draghici.hub.dto.ProductDTO;
 import com.draghici.hub.exceptions.ProductException;
@@ -11,14 +10,14 @@ import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -63,16 +62,14 @@ public class ProductServiceTest {
         productList.add(productA);
         productList.add(productB);
 
-        var pageable = PageRequest.of(0, 10);
-        when(productRepository.findAll(pageable)).thenReturn(new PageImpl<>(productList));
+        when(productRepository.findAll()).thenReturn(productList);
 
-        Page<Product> result = productService.getAll(pageable);
+        List<Product> result = productService.getAll();
 
-        assertEquals(2, result.getTotalElements(), "Total elements should be 2");
-        assertEquals(1L, result.getContent().get(0).getId(), "Product ID should match");
-        assertEquals("Product A test", result.getContent().get(0).getName(), "Product name should match");
-        assertEquals(7.09, result.getContent().get(1).getPrice(), "Product price should match");
-
+        assertEquals(2, result.size(), "Total elements should be 2");
+        assertEquals(1L, result.get(0).getId(), "Product ID should match");
+        assertEquals("Product A test", result.get(0).getName(), "Product name should match");
+        assertEquals(7.09, result.get(1).getPrice(), "Product price should match");
     }
 
     @Test
